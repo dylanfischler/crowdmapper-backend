@@ -1,0 +1,3 @@
+#!/bin/bash
+
+`amazon_kclpy_helper.py --print_command --java PATH_TO_JAVA --properties app.properties`
