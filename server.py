@@ -95,6 +95,7 @@ class RecordProcessor(processor.RecordProcessorBase):
         ####################################
         # Insert your processing logic here
         ####################################
+        print("processing record {}".format(data))
         return
 
     def should_update_sequence(self, sequence_number, sub_sequence_number):
