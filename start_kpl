@@ -1,0 +1,4 @@
+#!/bin/bash
+
+`amazon_kclpy_helper.py --print_command --java /usr/bin/java \
+--properties /Users/dylanfischler/Documents/projects/crowdmapper/crowdmapper-python/app.properties`
