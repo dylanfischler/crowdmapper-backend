@@ -21,6 +21,13 @@ import time
 from amazon_kclpy import kcl
 from amazon_kclpy.v2 import processor
 
+import mysql.connector
+from mysql.connector import errorcode
+import ConfigParser
+
+from LocationWriter import LocationWriter
+import ast
+
 
 class RecordProcessor(processor.RecordProcessorBase):
     """
@@ -37,6 +44,7 @@ class RecordProcessor(processor.RecordProcessorBase):
         self._largest_seq = (None, None)
         self._largest_sub_seq = None
         self._last_checkpoint_time = None
+        self._location_writer = None
 
     def initialize(self, initialize_input):
         """
@@ -46,6 +54,24 @@ class RecordProcessor(processor.RecordProcessorBase):
         """
         self._largest_seq = (None, None)
         self._last_checkpoint_time = time.time()
+
+        config = ConfigParser.RawConfigParser()
+        config.read('db_config')
+        configSections = config._sections
+
+        if 'db' in configSections:
+            db_config = configSections.get('db')
+            db_config.pop('__name__', None)
+            self._location_writer = LocationWriter(db_config)
+            self._location_writer.connectToDatabase()
+        else:
+            raise StandardError("Could not find db configuration")
+
+
+        config = ConfigParser.RawConfigParser()
+        config.read('db_config')
+        # opening sql connection
+        self._sql_cnx = mysql.connector.connect(**config)
 
     def checkpoint(self, checkpointer, sequence_number=None, sub_sequence_number=None):
         """
@@ -96,6 +122,15 @@ class RecordProcessor(processor.RecordProcessorBase):
         # Insert your processing logic here
         ####################################
         print("processing record {}".format(data))
+        location = ast.literal_eval(data)
+        # location = {
+        #     "timestamp": data.__getattribute__("timestamp"),
+        #     "lat": data.__getattribute__("lat"),
+        #     "long": data.__getattribute__("long"),
+        #     "speed": data.__getattribute__("speed")
+        # }
+        self._location_writer.writeLocation(location)
+
         return
 
     def should_update_sequence(self, sequence_number, sub_sequence_number):
@@ -152,6 +187,10 @@ class RecordProcessor(processor.RecordProcessorBase):
                 shard(s) it's required that a final checkpoint occurs.
         :param amazon_kclpy.messages.ShutdownInput shutdown_input: Information related to the shutdown request
         """
+
+        # closing sql connection
+        self._sql_cnx.close()
+
         try:
             if shutdown_input.reason == 'TERMINATE':
                 # Checkpointing with no parameter will checkpoint at the
