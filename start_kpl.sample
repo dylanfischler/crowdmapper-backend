@@ -1,4 +1,4 @@
 #!/bin/bash
 
-nohup `amazon_kclpy_helper.py --print_command --java PATH_TO_JAVA \
---properties app.properties` > kcl.log &
+`amazon_kclpy_helper.py --print_command --java PATH_TO_JAVA \
+--properties app.properties`
