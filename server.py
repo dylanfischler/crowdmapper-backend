@@ -189,7 +189,7 @@ class RecordProcessor(processor.RecordProcessorBase):
         """
 
         # closing sql connection
-        self._sql_cnx.close()
+        self._location_writer.closeWriter()
 
         try:
             if shutdown_input.reason == 'TERMINATE':
