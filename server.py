@@ -110,7 +110,6 @@ class RecordProcessor(processor.RecordProcessorBase):
         print("processing record {}".format(data))
         location = ast.literal_eval(data)
         self._location_writer.writeLocation(location)
-
         return
 
     def should_update_sequence(self, sequence_number, sub_sequence_number):
@@ -131,6 +130,8 @@ class RecordProcessor(processor.RecordProcessorBase):
             records.
         """
         try:
+            self._location_writer.connectToDatabase()
+
             for record in process_records_input.records:
                 data = record.binary_data
                 seq = int(record.sequence_number)
@@ -140,6 +141,8 @@ class RecordProcessor(processor.RecordProcessorBase):
                 if self.should_update_sequence(seq, sub_seq):
                     self._largest_seq = (seq, sub_seq)
 
+            self._location_writer.commitWrites()
+            self._location_writer.closeWriter()
             #
             # Checkpoints every self._CHECKPOINT_FREQ_SECONDS seconds
             #

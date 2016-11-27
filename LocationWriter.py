@@ -36,9 +36,11 @@ class LocationWriter(object):
             self.cursor.execute(location_insert, data)
             locationId = self.cursor.lastrowid
             print("Inserted {}".format(locationId))
-            self._sql_cnx.commit()
         except mysql.connector.Error as err:
             print("Could not insert location into database {}".format(err))
+
+    def commitWrites(self):
+        self._sql_cnx.commit()
 
     def closeWriter(self):
         self._sql_cnx.close()
