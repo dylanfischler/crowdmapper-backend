@@ -3,3 +3,4 @@ start_kpl
 db_config
 *.log
 *.out
+*.pyc
